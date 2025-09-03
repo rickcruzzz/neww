@@ -1,0 +1,450 @@
+import React, { useState, useEffect } from 'react';
+import { CheckSquare, Square, Clock, BookOpen, Code, Wifi, Shield, Calendar, Play, Pause, RotateCcw, Coffee } from 'lucide-react';
+
+const PlanoEstudos = () => {
+  const [tarefasConcluidas, setTarefasConcluidas] = useState({});
+  const [semanaAtual, setSemanaAtual] = useState(1);
+  const [diaAtual, setDiaAtual] = useState('Segunda');
+  const [pomodoroAtivo, setPomodoroAtivo] = useState(false);
+  const [tempoPomodoro, setTempoPomodoro] = useState(25 * 60); // 25 minutos em segundos
+  const [tipoSessao, setTipoSessao] = useState('foco'); // 'foco' ou 'pausa'
+  const [ciclosCompletos, setCiclosCompletos] = useState(0);
+
+  const toggleTarefa = (id) => {
+    setTarefasConcluidas(prev => ({
+      ...prev,
+      [id]: !prev[id]
+    }));
+  };
+
+  const iniciarPomodoro = () => {
+    setPomodoroAtivo(true);
+  };
+
+  const pausarPomodoro = () => {
+    setPomodoroAtivo(false);
+  };
+
+  const resetarPomodoro = () => {
+    setPomodoroAtivo(false);
+    if (tipoSessao === 'foco') {
+      setTempoPomodoro(25 * 60);
+    } else {
+      setTempoPomodoro(5 * 60);
+    }
+  };
+
+  const proximaSessao = () => {
+    if (tipoSessao === 'foco') {
+      setTipoSessao('pausa');
+      setTempoPomodoro(5 * 60);
+      setCiclosCompletos(prev => prev + 1);
+    } else {
+      setTipoSessao('foco');
+      setTempoPomodoro(25 * 60);
+    }
+    setPomodoroAtivo(false);
+  };
+
+  useEffect(() => {
+    let intervalo;
+    if (pomodoroAtivo && tempoPomodoro > 0) {
+      intervalo = setInterval(() => {
+        setTempoPomodoro(prev => prev - 1);
+      }, 1000);
+    } else if (tempoPomodoro === 0) {
+      proximaSessao();
+      // Som de notificação simulado
+      alert(tipoSessao === 'foco' ? '⏰ Tempo de pausa! (5 min)' : '⏰ Volta ao foco! (25 min)');
+    }
+    return () => clearInterval(intervalo);
+  }, [pomodoroAtivo, tempoPomodoro, tipoSessao]);
+
+  const formatarTempo = (segundos) => {
+    const mins = Math.floor(segundos / 60);
+    const segs = segundos % 60;
+    return `${mins.toString().padStart(2, '0')}:${segs.toString().padStart(2, '0')}`;
+  };
+
+  const cronogramaSemanal = {
+    1: {
+      titulo: "Semana 1 - Fundamentos",
+      sistemas: "Revisão: Sistemas Numéricos (Binário, Octal, Hex, Decimal)",
+      conectividade: "Fundamentos de Redes - Modelo OSI",
+      seguranca: "Portas Lógicas - AND, OR, NOT, NAND",
+      javascript: "Introdução ao JS - Variáveis e Tipos de Dados"
+    },
+    2: {
+      titulo: "Semana 2 - Operações e Lógica", 
+      sistemas: "Operações entre sistemas numéricos",
+      conectividade: "Endereçamento IPv4 - Classes de IP",
+      seguranca: "Portas Lógicas - XOR, NOR, XNOR",
+      javascript: "Operadores e Estruturas Condicionais"
+    },
+    3: {
+      titulo: "Semana 3 - Cálculos e Estruturas",
+      sistemas: "Arquitetura de Computadores básica",
+      conectividade: "Cálculos de Sub-rede - Máscara de Rede", 
+      seguranca: "Circuitos Combinacionais",
+      javascript: "Loops e Arrays"
+    },
+    4: {
+      titulo: "Semana 4 - Aplicação Prática",
+      sistemas: "Componentes de Hardware",
+      conectividade: "VLSM e Subnetting avançado",
+      seguranca: "Flip-Flops e Memória",
+      javascript: "Funções e Objetos"
+    }
+  };
+
+  const rotinaCompleta = {
+    Segunda: {
+      manha: "07:00-08:30 | Conectividade (1h) + JavaScript (30min)",
+      aula: "08:50-11:40 | Aula: Ambientes Computacionais e Conectividade",
+      tarde: "17:00-18:00 | Revisão da aula + Exercícios práticos",
+      noite: "Livre"
+    },
+    Terça: {
+      manha: "07:00-08:30 | Conectividade (1h) + Exercícios IP (30min)", 
+      aula: "08:50-11:40 | Aula: Ambientes Computacionais e Conectividade",
+      tarde: "17:00-17:30 | JavaScript (leve)",
+      noite: "17:30-19:00 | Academia → Igreja"
+    },
+    Quarta: {
+      manha: "07:00-08:30 | JavaScript Intensivo (1h30)",
+      aula: "Livre - sem aulas",
+      tarde: "17:00-18:30 | Sistemas Computacionais + Revisão",
+      noite: "Livre"
+    },
+    Quinta: {
+      manha: "07:00-08:30 | Segurança (1h) + Sistemas (30min)",
+      aula: "08:50-11:40 | Aula: Ambientes Computacionais e Segurança", 
+      tarde: "17:00-17:30 | JavaScript (leve)",
+      noite: "17:30-19:00 | Academia → Igreja"
+    },
+    Sexta: {
+      manha: "07:00-08:30 | JavaScript + Projetos (1h30)",
+      aula: "Livre - sem aulas",
+      tarde: "17:00-18:30 | Revisão Geral + Exercícios",
+      noite: "Livre"
+    },
+    Sabado: {
+      manha: "08:00-10:00 | Projetos JavaScript + Exercícios Práticos",
+      aula: "Livre",
+      tarde: "Livre ou revisão opcional",
+      noite: "Descanso"
+    },
+    Domingo: {
+      manha: "Opcional: 30min revisão leve",
+      aula: "Descanso",
+      tarde: "Descanso", 
+      noite: "Descanso"
+    }
+  };
+
+  return (
+    <div className="max-w-7xl mx-auto p-6 bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+      <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+        <h1 className="text-3xl font-bold text-center mb-2 text-indigo-800">
+          📚 Rotina Completa - ADS + JavaScript
+        </h1>
+        <p className="text-center text-gray-600 mb-4">
+          Estudo matinal + Aulas + Revisão com Pomodoro
+        </p>
+      </div>
+
+      {/* Timer Pomodoro */}
+      <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+        <h2 className="text-xl font-bold mb-4 text-red-600 flex items-center">
+          🍅 Timer Pomodoro
+        </h2>
+        
+        <div className="flex items-center justify-center space-x-6 mb-4">
+          <div className="text-center">
+            <div className={`text-6xl font-bold ${tipoSessao === 'foco' ? 'text-red-600' : 'text-green-600'}`}>
+              {formatarTempo(tempoPomodoro)}
+            </div>
+            <p className="text-lg font-medium mt-2">
+              {tipoSessao === 'foco' ? '🎯 Foco' : '☕ Pausa'}
+            </p>
+          </div>
+        </div>
+        
+        <div className="flex justify-center space-x-4 mb-4">
+          <button
+            onClick={iniciarPomodoro}
+            disabled={pomodoroAtivo}
+            className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+          >
+            <Play className="w-4 h-4 mr-2" />
+            Iniciar
+          </button>
+          
+          <button
+            onClick={pausarPomodoro}
+            disabled={!pomodoroAtivo}
+            className="flex items-center px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 disabled:opacity-50"
+          >
+            <Pause className="w-4 h-4 mr-2" />
+            Pausar
+          </button>
+          
+          <button
+            onClick={resetarPomodoro}
+            className="flex items-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
+          >
+            <RotateCcw className="w-4 h-4 mr-2" />
+            Reset
+          </button>
+        </div>
+        
+        <div className="text-center">
+          <p className="text-sm text-gray-600">
+            Ciclos Completos: <span className="font-bold text-indigo-600">{ciclosCompletos}</span>
+          </p>
+        </div>
+      </div>
+
+      <div className="grid lg:grid-cols-2 gap-6 mb-6">
+        {/* Rotina do Dia */}
+        <div className="bg-white rounded-lg shadow-lg p-6">
+          <h2 className="text-xl font-bold mb-4 text-indigo-700 flex items-center">
+            <Calendar className="mr-2" />
+            Rotina Diária
+          </h2>
+          
+          <div className="flex flex-wrap gap-2 mb-4">
+            {Object.keys(rotinaCompleta).map(dia => (
+              <button
+                key={dia}
+                onClick={() => setDiaAtual(dia)}
+                className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+                  diaAtual === dia 
+                    ? 'bg-indigo-600 text-white' 
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+              >
+                {dia}
+              </button>
+            ))}
+          </div>
+          
+          <div className="space-y-3">
+            <div className="p-3 bg-orange-50 rounded-lg">
+              <h3 className="font-semibold text-orange-800 mb-1">🌅 Manhã</h3>
+              <p className="text-sm text-orange-700">{rotinaCompleta[diaAtual].manha}</p>
+            </div>
+            
+            <div className="p-3 bg-blue-50 rounded-lg">
+              <h3 className="font-semibold text-blue-800 mb-1">🎓 Período de Aula</h3>
+              <p className="text-sm text-blue-700">{rotinaCompleta[diaAtual].aula}</p>
+            </div>
+            
+            <div className="p-3 bg-purple-50 rounded-lg">
+              <h3 className="font-semibold text-purple-800 mb-1">🌆 Tarde</h3>
+              <p className="text-sm text-purple-700">{rotinaCompleta[diaAtual].tarde}</p>
+            </div>
+            
+            <div className="p-3 bg-gray-50 rounded-lg">
+              <h3 className="font-semibold text-gray-800 mb-1">🌙 Noite</h3>
+              <p className="text-sm text-gray-700">{rotinaCompleta[diaAtual].noite}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Cronograma Semanal */}
+        <div className="bg-white rounded-lg shadow-lg p-6">
+          <h2 className="text-xl font-bold mb-4 text-indigo-700 flex items-center">
+            <BookOpen className="mr-2" />
+            Conteúdo da Semana
+          </h2>
+          
+          <div className="flex justify-center mb-4">
+            <div className="flex space-x-2">
+              {[1, 2, 3, 4].map(num => (
+                <button
+                  key={num}
+                  onClick={() => setSemanaAtual(num)}
+                  className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+                    semanaAtual === num 
+                      ? 'bg-indigo-600 text-white' 
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  }`}
+                >
+                  Sem {num}
+                </button>
+              ))}
+            </div>
+          </div>
+          
+          <div className="space-y-3">
+            <div className="p-3 bg-blue-50 rounded-lg">
+              <h3 className="font-semibold text-blue-800 flex items-center mb-2">
+                <BookOpen className="mr-2 w-4 h-4" />
+                Sistemas Computacionais
+              </h3>
+              <p className="text-sm text-blue-700">{cronogramaSemanal[semanaAtual].sistemas}</p>
+            </div>
+            
+            <div className="p-3 bg-green-50 rounded-lg">
+              <h3 className="font-semibold text-green-800 flex items-center mb-2">
+                <Wifi className="mr-2 w-4 h-4" />
+                Conectividade
+              </h3>
+              <p className="text-sm text-green-700">{cronogramaSemanal[semanaAtual].conectividade}</p>
+            </div>
+            
+            <div className="p-3 bg-red-50 rounded-lg">
+              <h3 className="font-semibold text-red-800 flex items-center mb-2">
+                <Shield className="mr-2 w-4 h-4" />
+                Segurança
+              </h3>
+              <p className="text-sm text-red-700">{cronogramaSemanal[semanaAtual].seguranca}</p>
+            </div>
+            
+            <div className="p-3 bg-yellow-50 rounded-lg">
+              <h3 className="font-semibold text-yellow-800 flex items-center mb-2">
+                <Code className="mr-2 w-4 h-4" />
+                JavaScript
+              </h3>
+              <p className="text-sm text-yellow-700">{cronogramaSemanal[semanaAtual].javascript}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Rotina Detalhada por Horário */}
+      <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+        <h2 className="text-xl font-bold mb-4 text-indigo-700">
+          ⏰ Rotina Completa com Pomodoros
+        </h2>
+        
+        <div className="grid lg:grid-cols-2 gap-6">
+          {/* Dias com Aula */}
+          <div>
+            <h3 className="font-bold text-gray-800 mb-3">📅 Segunda, Terça e Quinta (Dias de Aula)</h3>
+            <div className="space-y-2 text-sm">
+              <div className="p-2 bg-orange-50 rounded border-l-4 border-orange-400">
+                <strong>07:00-08:30</strong> - Estudo Matinal FOCADO
+                <br />• 3 Pomodoros: APENAS a matéria do dia (sem JS)
+              </div>
+              <div className="p-2 bg-blue-50 rounded border-l-4 border-blue-400">
+                <strong>08:50-11:40</strong> - Aulas na Faculdade
+                <br />• Conectividade (Seg/Ter) ou Segurança (Qui)
+              </div>
+              <div className="p-2 bg-purple-50 rounded border-l-4 border-purple-400">
+                <strong>12:00-17:00</strong> - IMERSÃO na Matéria
+                <br />• 10 Pomodoros: Revisão + Exercícios + Prática INTENSIVA
+              </div>
+              <div className="p-2 bg-red-100 rounded border-l-4 border-red-400">
+                <strong>17:00+</strong> - OFF TOTAL
+                <br />• Academia/Igreja ou tempo livre
+              </div>
+            </div>
+          </div>
+
+          {/* Dias Livres */}
+          <div>
+            <h3 className="font-bold text-gray-800 mb-3">🆓 Quarta, Sexta e Sábado (JavaScript + Geral)</h3>
+            <div className="space-y-2 text-sm">
+              <div className="p-2 bg-yellow-50 rounded border-l-4 border-yellow-400">
+                <strong>07:00-08:30</strong> - JavaScript Intensivo
+                <br />• 3 Pomodoros focados em JavaScript
+              </div>
+              <div className="p-2 bg-green-50 rounded border-l-4 border-green-400">
+                <strong>12:00-17:00</strong> - Mix Geral
+                <br />• 10 Pomodoros: JavaScript + Sistemas + Revisão das matérias
+              </div>
+              <div className="p-2 bg-red-100 rounded border-l-4 border-red-400">
+                <strong>17:00+</strong> - OFF TOTAL
+                <br />• Tempo livre, descanso, vida pessoal
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Checklist Diário */}
+      <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+        <h2 className="text-xl font-bold mb-4 text-indigo-700">
+          ✅ Checklist Diário
+        </h2>
+        
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[
+            { id: 'estudo_manha', tarefa: 'Estudo matinal completo', icone: '🌅' },
+            { id: 'revisao_aula', tarefa: 'Revisão pós-aula', icone: '📝' },
+            { id: 'javascript_diario', tarefa: 'Prática diária de JS', icone: '💻' },
+            { id: 'exercicios', tarefa: 'Exercícios práticos', icone: '🧮' },
+            { id: 'resumo', tarefa: 'Resumo dos aprendizados', icone: '📋' },
+            { id: 'descanso', tarefa: 'Pausa adequada entre estudos', icone: '😴' }
+          ].map(item => (
+            <div 
+              key={item.id}
+              className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                tarefasConcluidas[item.id] 
+                  ? 'bg-green-50 border-green-300' 
+                  : 'bg-gray-50 border-gray-200 hover:border-indigo-300'
+              }`}
+              onClick={() => toggleTarefa(item.id)}
+            >
+              <div className="flex items-center space-x-3">
+                {tarefasConcluidas[item.id] ? (
+                  <CheckSquare className="w-5 h-5 text-green-600" />
+                ) : (
+                  <Square className="w-5 h-5 text-gray-400" />
+                )}
+                
+                <div className="flex-1">
+                  <span className="text-lg mr-2">{item.icone}</span>
+                  <span className="text-sm font-medium text-gray-800">{item.tarefa}</span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Estrutura dos Pomodoros */}
+      <div className="bg-white rounded-lg shadow-lg p-6">
+        <h2 className="text-xl font-bold mb-4 text-indigo-700">
+          🍅 Como Usar os Pomodoros
+        </h2>
+        
+        <div className="grid md:grid-cols-3 gap-4 mb-4">
+          <div className="p-4 bg-red-50 rounded-lg text-center">
+            <div className="text-2xl mb-2">🎯</div>
+            <h3 className="font-bold text-red-800">25 min</h3>
+            <p className="text-sm text-red-700">Foco Total</p>
+          </div>
+          
+          <div className="p-4 bg-green-50 rounded-lg text-center">
+            <div className="text-2xl mb-2">☕</div>
+            <h3 className="font-bold text-green-800">5 min</h3>
+            <p className="text-sm text-green-700">Pausa Curta</p>
+          </div>
+          
+          <div className="p-4 bg-blue-50 rounded-lg text-center">
+            <div className="text-2xl mb-2">🏖️</div>
+            <h3 className="font-bold text-blue-800">15-30 min</h3>
+            <p className="text-sm text-blue-700">Pausa Longa (a cada 4 ciclos)</p>
+          </div>
+        </div>
+
+        <div className="bg-yellow-50 p-4 rounded-lg">
+          <h3 className="font-semibold text-yellow-800 mb-2">💡 Dicas para Máximo Aproveitamento:</h3>
+          <ul className="text-sm text-yellow-700 space-y-1">
+            <li>• 🔕 Celular no silencioso durante os pomodoros</li>
+            <li>• 📚 Tenha todo material organizado antes de começar</li>
+            <li>• ✏️ Anote dúvidas rapidamente, mas só resolva na pausa</li>
+            <li>• 💧 Use pausas para hidratar e esticar</li>
+            <li>• 🧠 Manhã cedo = melhor absorção de conteúdo novo</li>
+            <li>• 🔄 Tarde = revisão e prática do que aprendeu</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default PlanoEstudos;
